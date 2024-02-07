@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: dbc:mysql://mysqldb:3306/empcrud
+    username: root
+    password: RkpCC5F0uaKTJiu7l5Q
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+server:
+  error:
+    include-stacktrace: on_param
+    include-binding-errors: always
+    include-message: always
+springdoc:
+  api-docs:
+    path: /emp-api-docs
+  swagger-ui:
+    path: /swagger-ui-custom.html
+
