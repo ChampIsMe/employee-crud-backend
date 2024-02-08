@@ -1,12 +1,17 @@
 spring:
   datasource:
-    url: dbc:mysql://mysqldb:3306/empcrud
+    url: jdbc:mysql://empmysqldb:3306/empcrud?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: RkpCC5F0uaKTJiu7l5Q
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+
 server:
   error:
     include-stacktrace: on_param

@@ -11,7 +11,7 @@ import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.Date;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -20,6 +20,8 @@ import java.util.Set;
 @Data
 @Entity
 public class Employee {
+  @OneToMany(mappedBy = "employee")
+  Set<SkillExperiences> skills;
   @Schema(example = "1")
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +40,7 @@ public class Employee {
   private String email;
   @Schema(description = "Date of birth", example = "2023-11-30")
   @Temporal(TemporalType.DATE)
-  private LocalDateTime dob;
+  private Date dob;
   @Schema(description = "Street Address", example = "Long Street, Apt 404")
   @Column(nullable = false)
   private String address;
@@ -57,7 +59,4 @@ public class Employee {
   @Schema(description = "Last modified", example = "2023-11-30T13:40:17.453Z")
   @UpdateTimestamp(source = SourceType.DB)
   private LocalDateTime updatedAt;
-  
-  @OneToMany(mappedBy = "student")
-  Set<SkillExperiences> skills;
 }

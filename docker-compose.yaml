@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  empmysqldb:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=RkpCC5F0uaKTJiu7l5Q
+      - MYSQL_PASSWORD=RkpCC5F0uaKTJiu7l5Q
+      - MYSQL_DATABASE=empcrud
+    ports:
+      - "3308:3306"
+    volumes:
+      - /Users/philipokinyi/mysql-volumes/empcrud:/var/lib/mysql
+  empcrud-backend:
+    image: empcrud-backend
+    #restart: on-failure
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://empmysqldb:3306/empcrud?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      MYSQL_DATABASE: empcrud
+      SPRING_DATASOURCE_PASSWORD: RkpCC5F0uaKTJiu7l5Q
+    build:
+      context: "./"
+      dockerfile: "Dockerfile"
+    volumes:
+      - /Users/philipokinyi/docke-uploads/empcrud:/root/uploads
+    depends_on:
+      - empmysqldb
