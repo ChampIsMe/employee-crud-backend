@@ -2,10 +2,13 @@ package com.phil.employeecrudbackend.controllers;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phil.employeecrudbackend.dtos.employees.EmployeeCreate;
+import com.phil.employeecrudbackend.dtos.employees.EmployeeParams;
+import com.phil.employeecrudbackend.dtos.employees.EmployeeUpdate;
 import com.phil.employeecrudbackend.entities.Employee;
-import com.phil.employeecrudbackend.records.employees.EmployeeCreate;
-import com.phil.employeecrudbackend.records.employees.EmployeeParams;
-import com.phil.employeecrudbackend.records.employees.EmployeeUpdate;
+import com.phil.employeecrudbackend.entities.EmployeeExperience;
+import com.phil.employeecrudbackend.entities.Skill;
+import com.phil.employeecrudbackend.models.ExperienceSchema;
 import com.phil.employeecrudbackend.services.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -25,9 +28,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Tag(name = "Employees API", description = "CRUD APIs for employees")
 @Validated
@@ -48,8 +53,19 @@ public class EmployeeCtrl {
       @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})})
   @PostMapping("/create")
   ResponseEntity<Map<String, Long>> create(@Valid @RequestBody EmployeeCreate body) {
+    List<ExperienceSchema> skillsSchemas = body.getSkills();
+    body.setSkills(new ArrayList<>());
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     Employee employee = objectMapper.convertValue(body, Employee.class);
+    List<EmployeeExperience> employeeExperiences = skillsSchemas.stream().map(skillsSchema -> EmployeeExperience.builder()
+        .yrs(skillsSchema.getYrs())
+        .skill(Skill.builder()
+            .id(skillsSchema.getId())
+            .name(skillsSchema.getSkill())
+            .build())
+        .seniority(skillsSchema.getSeniority())
+        .build()).collect(Collectors.toList());
+    employee.setEmployeeExperiences(employeeExperiences);
     Long id = employeeService.create(employee);
     return ResponseEntity.status(200).body(Map.of("id", id));
   }
@@ -70,6 +86,8 @@ public class EmployeeCtrl {
     return ResponseEntity.status(200).body(employee);
   }
   
+  //Todo: remove @SuppressWarnings("unused") once pageable and params are used
+  @SuppressWarnings("unused")
   @Operation(
       summary = "Retrieve a list of employees",
       description = "Retrieve a list of employees by query"
@@ -99,12 +117,24 @@ public class EmployeeCtrl {
       @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})})
   @PatchMapping("/update/{id}")
   ResponseEntity<Employee> update(@PathVariable Long id, @Valid @RequestBody EmployeeUpdate body) {
-    if (!Objects.equals(body.id(), id)) {
+    if (!Objects.equals(body.getId(), id)) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Inconsistent update IDs. Make sure the ID in the URL path is the same as ID passed or ignore ID in your payload");
     }
+    List<ExperienceSchema> skillsSchemas = body.getSkills();
+    body.setSkills(new ArrayList<>());
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     Employee employee = objectMapper.convertValue(body, Employee.class);
     employee.setId(id);
+    
+    List<EmployeeExperience> employeeExperiences = skillsSchemas.stream().map(skillsSchema -> EmployeeExperience.builder()
+        .yrs(skillsSchema.getYrs())
+        .skill(Skill.builder()
+            .id(skillsSchema.getId())
+            .name(skillsSchema.getSkill())
+            .build())
+        .seniority(skillsSchema.getSeniority())
+        .build()).collect(Collectors.toList());
+    employee.setEmployeeExperiences(employeeExperiences);
     Employee updatedEmployee = employeeService.update(employee);
     return ResponseEntity.status(HttpStatus.OK).body(updatedEmployee);
   }

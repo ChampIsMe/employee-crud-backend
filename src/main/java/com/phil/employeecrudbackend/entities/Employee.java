@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,8 +20,14 @@ import java.util.Set;
 @Data
 @Entity
 public class Employee {
-  @OneToMany(mappedBy = "employee")
-  Set<SkillExperiences> skills;
+  @JoinTable(
+      name = "employee_experience_link",
+      joinColumns = @JoinColumn(name = "employee_id"),
+      inverseJoinColumns = @JoinColumn(name = "employee_experience_id")
+  )
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  List<EmployeeExperience> EmployeeExperiences;
+  
   @Schema(example = "1")
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

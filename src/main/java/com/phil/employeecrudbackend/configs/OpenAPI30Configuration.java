@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 //        termsOfService = "${tos.uri}",
         description = "Documentation for Employee API backend"
     ),
-    servers = @Server(url = "/", description = "Production")
+    servers = @Server(url = "/", description = "Development")
 )
 //todo: Uncomment when auth is implemented
 /*@SecurityScheme(

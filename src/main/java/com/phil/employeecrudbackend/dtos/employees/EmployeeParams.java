@@ -1,6 +1,7 @@
-package com.phil.employeecrudbackend.records.employees;
+package com.phil.employeecrudbackend.dtos.employees;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 
 public record EmployeeParams(
     @Schema(description = "Employee's first name", example = "Philip")
@@ -10,6 +11,7 @@ public record EmployeeParams(
     @Schema(description = "Contact number", example = "+27715153701")
     String contactNumber,
     @Schema(description = "Email Address", example = "po@example.com")
+    @Email(message = "The email is not a valid email.")
     String email,
     @Schema(description = "Date of birth", example = "2023-11-30")
     String dob,
