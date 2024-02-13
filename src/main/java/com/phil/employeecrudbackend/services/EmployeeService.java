@@ -1,11 +1,16 @@
 package com.phil.employeecrudbackend.services;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.phil.employeecrudbackend.dtos.employees.EmployeeParams;
 import com.phil.employeecrudbackend.entities.Employee;
 import com.phil.employeecrudbackend.entities.EmployeeExperience;
 import com.phil.employeecrudbackend.entities.Skill;
 import com.phil.employeecrudbackend.repositories.EmployeeExperienceRepo;
 import com.phil.employeecrudbackend.repositories.EmployeeRepo;
 import com.phil.employeecrudbackend.repositories.SkillsRepo;
+import com.phil.employeecrudbackend.repositories.queryutils.QueryService;
 import com.phil.employeecrudbackend.services.interfaces.IEmployeeService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -14,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -23,22 +30,47 @@ public class EmployeeService implements IEmployeeService {
   private final EmployeeRepo employeeRepo;
   private final SkillsRepo skillsRepo;
   private final EmployeeExperienceRepo experienceRepo;
+  private final QueryService queryService;
+  private final ObjectMapper objectMapper;
   
   @Transactional
   @Override
-  public Long create(Employee employee) {
+  public Employee create(Employee employee) {
+    /*
+    This could be efficient with Mysql triggers for the benefit of DBAs however this approach is used to ensure empId is returned from the transaction
+    If being random was not a requirement, it could be auto incremented from 1000 but less than 9999.
+    * */
+    int empID = employeeRepo.generateEmployeeId();
     employee.getEmployeeExperiences().stream().filter(employeeExperience -> employeeExperience.getId() != null).forEach(employeeExperience -> skillsRepo.findById(employeeExperience.getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "New skills cannot be passed with IDs. ")));
     employee.getEmployeeExperiences().forEach(employeeExperience -> {
-      Skill skill = skillsRepo.save(employeeExperience.getSkill());
-      employeeExperience.setSkill(skill);
+      //Insert only new skills
+      Optional<Skill> skillInDB = skillsRepo.findByName(employeeExperience.getSkill().getName());
+      if (skillInDB.isEmpty()) {
+        Skill skill = skillsRepo.save(employeeExperience.getSkill());
+        employeeExperience.setSkill(skill);
+      } else {
+        employeeExperience.setSkill(skillInDB.get());
+      }
     });
-    Employee result = employeeRepo.save(employee);
-    return result.getId();
+    employee.setEmpId(empID);
+    return employeeRepo.save(employee);
   }
   
   @Override
   public Employee findById(Long id) {
     return employeeRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with such ID"));
+  }
+  
+  @Override
+  public List<Employee> findByCustomParams(EmployeeParams employeeParams) {
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    Map<String, Object> map = objectMapper.convertValue(employeeParams, new TypeReference<>() {
+    });
+    if (map.keySet().isEmpty()) {
+      //Assuming no pagination
+      return employeeRepo.findAll();
+    }
+    return queryService.employeesSearchByValue(map);
   }
   
   @Override

@@ -42,8 +42,11 @@ public class Employee {
   @Column(nullable = false)
   private String contactNumber;
   @Schema(description = "Email Address", example = "po@example.com")
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String email;
+  @Schema(description = "Employee ID", example = "7271")
+  @Column( unique = true,updatable = false)
+  private int empId;
   @Schema(description = "Date of birth", example = "2023-11-30")
   @Temporal(TemporalType.DATE)
   private Date dob;

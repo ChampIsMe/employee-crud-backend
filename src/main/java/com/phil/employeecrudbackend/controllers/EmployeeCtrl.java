@@ -20,10 +20,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -52,7 +50,7 @@ public class EmployeeCtrl {
       @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
       @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})})
   @PostMapping("/create")
-  ResponseEntity<Map<String, Long>> create(@Valid @RequestBody EmployeeCreate body) {
+  ResponseEntity<Employee> create(@Valid @RequestBody EmployeeCreate body) {
     List<ExperienceSchema> skillsSchemas = body.getSkills();
     body.setSkills(new ArrayList<>());
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -66,8 +64,7 @@ public class EmployeeCtrl {
         .seniority(skillsSchema.getSeniority())
         .build()).collect(Collectors.toList());
     employee.setEmployeeExperiences(employeeExperiences);
-    Long id = employeeService.create(employee);
-    return ResponseEntity.status(200).body(Map.of("id", id));
+    return ResponseEntity.status(200).body(employeeService.create(employee));
   }
   
   @Operation(
@@ -99,9 +96,8 @@ public class EmployeeCtrl {
       @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
       @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})})
   @GetMapping("/list")
-  ResponseEntity<List<Employee>> getList(@ParameterObject Pageable pageable, @Nullable @RequestParam EmployeeParams params) {
-    //todo: implement filtering with params RequestParam
-    List<Employee> employees = employeeService.findAll();
+  ResponseEntity<List<Employee>> getList(@ParameterObject EmployeeParams params) {
+    List<Employee> employees = employeeService.findByCustomParams(params);
     return ResponseEntity.status(HttpStatus.OK).body(employees);
   }
   
