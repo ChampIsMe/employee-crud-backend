@@ -15,7 +15,9 @@
 
 ### How to run
 
-Import the project and run the command `bash deploy_locally.sh` at the root of the project and view at http://localhost:8082/swagger-ui/index.html
+Import the project and run the command `bash deploy_locally.sh` at the root of the project.
+
+## Connect to the dockerized DB and run the following commands.
 
 #### Allow function creators to enable Mysql function creation:
 
@@ -45,4 +47,8 @@ END$$
 
 DELIMITER ;
 ```
+## You're now set!
+
+View API docs at http://localhost:8082/swagger-ui/index.html
+
 ![img.png](img.png)
