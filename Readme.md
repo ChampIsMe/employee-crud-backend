@@ -1,6 +1,23 @@
-# Dev In progress.  You can run `bash deploy_locally.sh` and view at http://localhost:8082/swagger-ui/index.html
+## This is a React frontend for [Employee CRUD backend](https://github.com/ChampIsMe/employee-crud-backend ).
 
-#### Allow function creators:
+### Features demonstrated:
+
+- [ ] CRUD using Spring boot.(Delete is demonstrated in the API docs)
+
+### Info:
+- There is minimal test for demonstration due to more effort required in the resto of the app.
+
+## Requirements & Tools used.
+
+- [ ] Java 21 ```18.2.0```
+- [ ] Gradle ```8.6```
+- [ ] M1 (Apple Silicon) OS environment.
+
+### How to run
+
+Import the project and run the command `bash deploy_locally.sh` at the root of the project and view at http://localhost:8082/swagger-ui/index.html
+
+#### Allow function creators to enable Mysql function creation:
 
 ```mysql
 SET GLOBAL log_bin_trust_function_creators = ON;
@@ -28,3 +45,4 @@ END$$
 
 DELIMITER ;
 ```
+![img.png](img.png)
